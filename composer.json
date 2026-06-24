@@ -1,0 +1,39 @@
+{
+    "name": "rosgear/ge2",
+    "description": "Ge PHP Framework Version 2.0",
+    "keywords": ["RosGear", "ge2", "framework"],
+    "homepage": "https://rosgear.ru/",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Anton Tivonenko",
+            "email": "anton.tivonenko@gmail.com",
+            "homepage": "https://rosgear.ru/"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "ext-mbstring": "*",
+        "ext-ctype": "*",
+        "lib-pcre": "*",
+        "rosgear/symfony-cache": "*",
+        "symfony/finder": "*",
+        "symfony/http-foundation": "*",
+        "jbroadway/urlify": "*",
+        "maiorano84/shortcodes": "*",
+        "phpmailer/phpmailer": "*",
+        "phpthumb/phpthumb": "*",
+        "league/flysystem": "3.x",
+        "league/flysystem-memory": "^3.0",
+        "league/flysystem-ziparchive": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {"Ge\\": "framework/"},
+        "files": [
+            "framework/Ge.php"
+        ]
+    },
+    "minimum-stability" : "dev",
+    "prefer-stable" : true
+}

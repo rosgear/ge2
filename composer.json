@@ -17,7 +17,7 @@
         "ext-mbstring": "*",
         "ext-ctype": "*",
         "lib-pcre": "*",
-        "rosgear/symfony-cache": "*",
+        "rosgear/symfony-cache": "^7.4",
         "symfony/finder": "*",
         "symfony/http-foundation": "*",
         "jbroadway/urlify": "*",

@@ -339,7 +339,7 @@ class Query extends AbstractSql
     /**
      * {@inheritdoc}
      */
-    public function getSqlString(PlatformInterface $adapterPlatform): string
+    public function getSqlString(?PlatformInterface $adapterPlatform = null): string
     {
         return $this->query . ' ' . parent::getSqlString($adapterPlatform);
     }

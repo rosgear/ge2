@@ -1035,14 +1035,14 @@ class Ge
         $objectId = $id . $name;
         if (isset(static::$container[$objectId])) return static::$container[$objectId];
 
-        /** @var BaseObject|null $model */
-        $model = static::$app->extensions->getObject($name, $id, $config);
-        if ($model === null) {
+        /** @var BaseObject|null $object */
+        $object = static::$app->extensions->getObject($name, $id, $config);
+        if ($object === null) {
             throw new CreateObjectException(
-                static::t('app', 'Could not defined data model "{0}"', [$id . '::' . 'Model' . NS . $name])
+                static::t('app', 'Object is not defined "{0}"', [$id . '::' . $name])
             );
         }
-        return static::$container[$objectId] = $model;
+        return static::$container[$objectId] = $object;
     }
 
     /**
@@ -1070,7 +1070,7 @@ class Ge
         $model = static::$app->modules->getObject($name, $id, $config);
         if ($model === null) {
             throw new CreateObjectException(
-                static::t('app', 'Could not defined data model "{0}"', [$id . '::' . 'Model' . NS . $name])
+                static::t('app', 'Object is not defined "{0}"', [$id . '::' . $name])
             );
         }
         return static::$container[$objectId] = $model;

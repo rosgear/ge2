@@ -197,8 +197,10 @@ class CrudSegments extends BaseMatcher
             $route = Ge::$app->urlManager->route;
         }
 
-        // проверка принадлежности маршрута модулю
-        if (strpos($route, $this->route) !== 0) return false;
+        // Проверка принадлежности маршрута модулю, чтобы не было коллизии при 
+        // проверке, добавляем экран "/". Это поможет избежать такого случая:
+        // foo/bar-test = foo/bar => foo/bar-test/ = foo/bar/
+        if (strpos($route . '/', $this->route . '/') !== 0) return false;
 
         // проверка метода запроса если он указан
         if ($this->method) {

@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://rosgear.ru/" target="_blank">
-        <img src="https://rosgear.ru/uploads/img/ge-framework_logo.svg" width="400" alt="Ge Framework" />
+        <img src="https://rosgear.ru/uploads/img/framework_logo.svg" width="400" alt="Ge Framework" />
     </a>
 </p>
 

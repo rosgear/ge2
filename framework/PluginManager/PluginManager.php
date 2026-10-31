@@ -804,6 +804,19 @@ class PluginManager extends Service
     }
 
     /**
+     * Проверяет установлен ли плагин с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор плагина в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если плагин установлен, и `false` в противном случае. 
+     */
+    public function IsInstalled(string|int $id): bool
+    {
+        return $this->getRegistry()->getAt($id) !== null;
+    }
+
+    /**
      * Возвращает атрибуты плагина из базы данных по указанному идентификатору.
      * 
      * @param string|int $id Идентификатор компонента в реестре или в базе 

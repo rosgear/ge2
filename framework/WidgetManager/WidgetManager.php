@@ -844,6 +844,19 @@ class WidgetManager extends Service
     }
 
     /**
+     * Проверяет установлен ли виджет с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор виджета в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если виджет установлен, и `false` в противном случае. 
+     */
+    public function IsInstalled(string|int $id): bool
+    {
+        return $this->getRegistry()->getAt($id) !== null;
+    }
+
+    /**
      * Возвращает атрибуты виджета из базы данных по указанному идентификатору.
      * 
      * @param string|int $id Идентификатор компонента в реестре или в базе 

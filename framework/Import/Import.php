@@ -133,6 +133,8 @@ class Import extends BaseObject
      */
     public string $allowedExtensions = 'mp3,mp4,webm,webp,jpg,jpeg,gif,tiff,png,svg,doc,docx,pdf,xls,xlsx,xml,json,zip,otf,ttf,woff';
 
+    public array $processedComponents = [];
+
     /**
      * Возвращает маску атрибутов (свойств, тегов) импортирумего файла.
      * 
@@ -343,6 +345,8 @@ class Import extends BaseObject
      */
     public function runPackage(string $filename): void
     {
+        $this->processedComponents = [];
+
         $parserType = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if ($parserType !== 'xml') return;
 
@@ -410,11 +414,23 @@ class Import extends BaseObject
         }
 
         foreach ($package['components'] as $component) {
-            $model = $this->createComponentImport(
-                $component['type'], $component['id'], $component['cls'] ?: 'Import'
-            );
-            if ($model)
-                $model->run($path . DS . $component['file']);
+            $type = $component['type'];
+            if ($type === 'module')
+                $isInstalled = Ge::IsModuleInstalled($component['id']);
+            else
+            if ($type === 'extension')
+                $isInstalled = Ge::IsExtensionInstalled($component['id']);
+
+            if ($isInstalled) {
+                $model = $this->createComponentImport(
+                    $type, $component['id'], $component['cls'] ?: 'Import'
+                );
+                if ($model)
+                    $model->run($path . DS . $component['file']);
+
+                $this->addProcessedComponent($component, $model ? true : false);
+            } else
+                $this->addProcessedComponent($component, $isInstalled);
         }
         $this->afterRun($filename, true);
     }
@@ -561,5 +577,30 @@ class Import extends BaseObject
             }
         }
         return $this->model;
+    }
+
+    /**
+     * Возвращает модель данных (активную запись) для импорта данных.
+     * 
+     * @param array $component
+     * @param bool $success
+     * 
+     * @return void
+     */
+    public function addProcessedComponent(array $component, bool $success): void
+    {
+        $component['success'] = $success;
+        $this->processedComponents[$component['id']] = $component;
+    }
+
+    public function getUnprocessedComponents(): array
+    {
+        $components = [];
+        foreach ($this->processedComponents as $component) {
+            if (!$component['success']) {
+                $components[] = $component;
+            }
+        }
+        return $components;
     }
 }

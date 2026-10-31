@@ -1284,4 +1284,59 @@ class Ge
         else
             return static::$app->language->get($param, $default);
     }
+
+    /**
+     * Проверяет установлен ли модуль с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор модуля в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если модуль установлен, и `false` в противном случае. 
+     */
+    public static function IsModuleInstalled(string|int $id): bool
+    {
+        return static::$app->modules->isInstalled($id);
+    }
+
+    /**
+     * Проверяет установлено ли расширение модуля с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор расширения модуля в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если расширение модуля установлено, и `false` 
+     *     в противном случае.
+     */
+    public static function IsExtensionInstalled(string|int $id): bool
+    {
+        return static::$app->extensions->isInstalled($id);
+    }
+
+    /**
+     * Проверяет установлен ли виджет с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор виджета в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если виджет установлен, и `false` 
+     *     в противном случае.
+     */
+    public static function IsWidgetInstalled(string|int $id): bool
+    {
+        return static::$app->widgets->isInstalled($id);
+    }
+
+    /**
+     * Проверяет установлен ли плагин с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор плагина в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если плагин установлен, и `false` 
+     *     в противном случае.
+     */
+    public static function IsPluginInstalled(string|int $id): bool
+    {
+        return static::$app->plugins->isInstalled($id);
+    }
 }

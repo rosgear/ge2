@@ -48,11 +48,16 @@ trait InstallerMessagesTrait
     /**
      * Возвращает значение, указывающее, было ли сообщение.
      * 
+     * @param string $type Тип сообщения: "error", "warning", "info" (по умолчанию '').
+     * 
      * @return bool
      */
-    public function hasMessage(): bool
+    public function hasMessage(string $type = ''): bool
     {
-        return isset($this->messages[0]);
+        if (isset($this->messages[0]))
+            return $type === '' ? true : $this->messages[0]['type'] === $type;
+        else
+            return false;
     }
 
     /**
@@ -63,6 +68,26 @@ trait InstallerMessagesTrait
     public function hasError(): bool
     {
         return isset($this->messages[0]);
+    }
+
+    /**
+     * Возвращает значение, указывающее, было ли предупреждение.
+     * 
+     * @return bool
+     */
+    public function hasWarning(): bool
+    {
+        return $this->hasMessage('warning');
+    }
+
+    /**
+     * Возвращает значение, указывающее, была ли информация.
+     * 
+     * @return bool
+     */
+    public function hasInfo(): bool
+    {
+        return $this->hasMessage('info');
     }
 
     /**

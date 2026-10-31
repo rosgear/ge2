@@ -792,6 +792,19 @@ class BaseManager extends Service
     }
 
     /**
+     * Проверяет установлен ли компонент с указанным идентификатором.
+     * 
+     * @param string|int $id Идентификатор компонента в реестре или в базе данных, 
+     *     например: 123, 'rg.foobar'.
+     * 
+     * @return bool Возвращает `true`, если компонент установлен, и `false` в противном случае. 
+     */
+    public function IsInstalled(string|int $id): bool
+    {
+        return $this->getRegistry()->getAt($id) !== null;
+    }
+
+    /**
      * Создаёт установщик компонента.
      * 
      * @param string $namespace Пространство имён компонента, например '\Rg\FooBar'.

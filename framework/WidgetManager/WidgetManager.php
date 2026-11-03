@@ -187,7 +187,7 @@ class WidgetManager extends Service
         $basePath = Ge::$app->modulePath . $path;
         if (!file_exists($basePath)) {
             throw new Exception\WidgetNotFoundException(
-                Ge::t('app', 'File {0} "{0}" not exists', [Ge::t('app', 'Widget'), $basePath])
+                Ge::t('app', 'File {0} "{1}" not exists', [Ge::t('app', 'Widget'), $basePath])
             );
         }
 

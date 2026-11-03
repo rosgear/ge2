@@ -266,7 +266,11 @@ class Installer extends BaseObject
     public function getConfig(): InstallerConfig
     {
         if (!isset($this->config)) {
-            $this->config = new InstallerConfig($this->getPath() . DS . 'config' . DS . '.setup.php', true);
+            $path = $this->getPath() . DS . 'config' . DS;
+            $this->config = new InstallerConfig($path . '.setup.php', true);
+            // загрузка дополнительного файла конфигурации с возможностью
+            // переопределения ключей основного файла
+            $this->config->append($path . '.extra.php');
         }
         return $this->config;
     }

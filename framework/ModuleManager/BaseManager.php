@@ -165,7 +165,6 @@ class BaseManager extends Service
         // абсолютный путь к объекту
         $modulePath = Ge::$app->modulePath . $path;
         if (!file_exists($modulePath)) {
-            echo $modulePath;
             throw new Exception\ModuleNotFoundException(
                 Ge::t('app', 'File {0} "{1}" not exists', [Ge::t('app', $this->callableClassName), $modulePath])
             );

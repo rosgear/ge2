@@ -3,7 +3,7 @@
  * Этот файл является частью пакета Ge Framework.
  * 
  * @link https://rosgear.ru/framework/
- * @copyright Copyright (c) 2015 RosGear
+ * @copyright Copyright (c) 2026 RosGear
  * @license https://rosgear.ru/license/
  */
 
@@ -200,7 +200,7 @@ class Language extends Service
     }
 
     /**
-     * Возвращает метаинформацию о указанном языке.
+     * Возвращает метаданные запрошенного языка.
      * 
      * @param string $localeName Имя локализации, например: 'ru_RU', 'en_GB'.
      * 
@@ -235,11 +235,18 @@ class Language extends Service
     }
 
     /**
-     * Определяет параметры язык из URL-адреса.
+     * Определяет параметры языка на основе данных, извлечённых из текущего URL-адреса.
      * 
-     * @return array Параметры языка.
+     * В результате формируется набор языковых настроек (например, код языка, слаг и т.д.), 
+     * которые используются для дальнейшей локализации интерфейса или логики приложения.
+     * 
+     * @param bool $checkSide При значении `true` выполняется проверка доступности текущего 
+     *    языка интерфейса для активной стороны приложения (frontend или backend). В результате 
+     *    определяется, поддерживается ли выбранный язык в данной части приложения.
+     * 
+     * @return array<string, mixed> Параметры языка.
      */
-    public function define(): ?array
+    public function define(bool $checkSide = false): ?array
     {
         $language = null;
         $url = Ge::$app->urlManager;
@@ -253,6 +260,15 @@ class Language extends Service
             if ($slug) {
                 // если слаг совпадает с псевдонимом языка
                 if (($language = $this->available->getBy($slug, 'slug')) !== null) {
+                    // если необходимо проверить сторону,
+                    // чтобы не изменять маршрут если язык не доступен для стороны
+                    if ($checkSide) {
+                        $isBackend = $url->isBackendRoute($language['slug']);
+                        if ($isBackend)
+                            $language = $language[BACKEND] === true ? $language : null;
+                        else
+                            $language = $language[FRONTEND] === true ? $language : null;
+                    }
                     if ($language) {
                         if ($this->isPosPrefix)
                             $url->segments->shift();
@@ -270,6 +286,14 @@ class Language extends Service
             if ($slug !== false) {
                 // если язык совпадает с псевдонимом языка
                 $language = $this->available->getBy($slug, 'slug');
+                // если необходимо проверить сторону
+                if ($language !== null && $checkSide) {
+                    $isBackend = $url->isBackendRoute($language['slug']);
+                    if ($isBackend)
+                        $language = $language[BACKEND] === true ? $language : null;
+                    else
+                        $language = $language[FRONTEND] === true ? $language : null;
+                }
             }
         }
 

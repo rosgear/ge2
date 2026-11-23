@@ -3,7 +3,7 @@
  * Этот файл является частью пакета Ge Framework.
  * 
  * @link https://rosgear.ru/framework/
- * @copyright Copyright (c) 2015 RosGear
+ * @copyright Copyright (c) 2026 RosGear
  * @license https://rosgear.ru/license/
  */
 
@@ -460,16 +460,26 @@ class UrlManager extends Service
     }
 
     /**
-     * Проверят, относится ли маршрут запроса к маршруту панели управления.
+     * Проверяет, входит ли запрошенный маршрут в перечень маршрутов, доступных через 
+     * Панель управления. 
+     * 
+     * @param null|string $languageSlug Если указан слаг языка (например, ru, en), 
+     *    система проверяет, входит ли запрошенный маршрут в перечень маршрутов, 
+     *    доступных в Панели управления для указанного языка. Проверка выполняется 
+     *    с учётом языковой локализации маршрутов (по умолчанию `null`).
      * 
      * @return bool
      */
-    public function isBackendRoute(): bool
+    public function isBackendRoute(?string $languageSlug = null): bool
     {
+        if ($languageSlug) {
+            return strpos($this->route . '/', $languageSlug . '/' . $this->backendRoute . '/') === 0;
+        }
+
         if (isset($this->_isBackendRoute)) {
             return $this->_isBackendRoute;
         }
-        return $this->_isBackendRoute = strpos($this->route, $this->backendRoute) === 0;
+        return $this->_isBackendRoute = strpos($this->route . '/', $this->backendRoute . '/') === 0;
     }
 
     /**
@@ -486,7 +496,8 @@ class UrlManager extends Service
     }
 
     /**
-     * Возвращает URL-адрес сценария (без имени файла), который обрабатывает запрос.
+     * Возвращает URL-адрес сценария (без указания имени файла), который предназначен 
+     * для обработки входящего запроса.
      * 
      * @return string
      * 
@@ -511,12 +522,15 @@ class UrlManager extends Service
     }
 
     /**
-     * Возвращает URL-адрес, URL-путь и имя сценария обрабатывающий запрос.
+     * Возвращает данные для идентификации сценария, обрабатывающего запрос: полный 
+     * URL‑адрес сценария (без фрагмента и query‑параметров), относительный URL‑путь 
+     * и имя файла сценария.
      * 
-     * @return array Возвращает:
-     *    - url - URL-адрес сценария;
-     *    - path - URL-путь сценария;
-     *    - filename - имя сценария.
+     * @return array{
+     *     url: string, // URL-адрес сценария
+     *     path: string, // URL-путь сценария
+     *     filename: string // имя сценария
+     * }
      */
     public function getScript(): array
     {

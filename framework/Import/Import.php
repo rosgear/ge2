@@ -79,6 +79,37 @@ class Import extends BaseObject
     protected array $package = [];
 
     /**
+     * Полный путь импортируемого файла или путь файла пакета, использованного при 
+     * последнем выполненном импорте данных.
+     * 
+     * @see Import::runPackage()
+     * @see Import::run()
+     * 
+     * @var string
+     */
+    public string $path = '';
+
+    /**
+     * Полный путь и имя импортируемого файла или файла пакета, использованного при 
+     * последнем выполненном импорте данных.
+     * 
+     * @see Import::runPackage()
+     * @see Import::run()
+     * 
+     * @var string
+     */
+    public string $filename = '';
+
+    /**
+     * Расширение импортируемого файла на основе значения атрибута.
+     * 
+     * @see Import::importFileAttribute()
+     * 
+     * @var string
+     */
+    public string $importFileExtension = 'dat';
+
+    /**
      * Типы парсеров в виде пар "тип - класс парсера".
      * 
      * @var array
@@ -133,6 +164,13 @@ class Import extends BaseObject
      */
     public string $allowedExtensions = 'mp3,mp4,webm,webp,jpg,jpeg,gif,tiff,png,svg,doc,docx,pdf,xls,xlsx,xml,json,zip,otf,ttf,woff';
 
+    /**
+     * Список компонентов, для которых были импортированы демонстрационные данные.
+     * 
+     * @see Import::addProcessedComponent()
+     * 
+     * @var array<string, array>
+     */
     public array $processedComponents = [];
 
     /**
@@ -310,6 +348,9 @@ class Import extends BaseObject
      */
     public function run(string $filename, ?string $parserType = null): void
     {
+        $this->filename = $filename;
+        $this->path = pathinfo($filename, PATHINFO_DIRNAME);
+
         if (!$this->beforeRun($filename, $parserType, false)) return;
 
         if ($parserType === null) {
@@ -336,7 +377,7 @@ class Import extends BaseObject
     /**
      * Выполняет импорт данных из пакета файлов.
      * 
-     * @param string $filename Имя файла пакета  включая путь).
+     * @param string $filename Имя файла пакета включая путь.
      * 
      * @return void
      * 
@@ -345,6 +386,8 @@ class Import extends BaseObject
      */
     public function runPackage(string $filename): void
     {
+        $this->filename = $filename;
+        $this->path = pathinfo($filename, PATHINFO_DIRNAME);
         $this->processedComponents = [];
 
         $parserType = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -370,6 +413,8 @@ class Import extends BaseObject
 
         /** @var string $path Абсолютный путь к файлу пакета */
         $path = dirname($filename);
+        // добавляем абсолютный путь к файлу пакета
+        $this->package['path'] = $path;
 
         /** @var string|false $filesPath Путь к файлам копирования */
         $filesPath = Ge::getAlias($this->filesPath);
@@ -422,11 +467,15 @@ class Import extends BaseObject
                 $isInstalled = Ge::IsExtensionInstalled($component['id']);
 
             if ($isInstalled) {
+                /** @var \Ge\Import\Import $model */
                 $model = $this->createComponentImport(
                     $type, $component['id'], $component['cls'] ?: 'Import'
                 );
-                if ($model)
+                if ($model) {
+                    // чтобы модель знала о существовании пакета если он есть
+                    $model->setPackage($this->package);
                     $model->run($path . DS . $component['file']);
+                }
 
                 $this->addProcessedComponent($component, $model ? true : false);
             } else
@@ -463,11 +512,57 @@ class Import extends BaseObject
      * 
      * @see Import::$package
      * 
-     * @return array
+     * @return array<string, mixed>
      */
     public function getPackage(): array
     {
         return $this->package;
+    }
+
+    /**
+     * Устанавливает информацию о пакете импортируемых файлов.
+     * 
+     * @param array<string, mixed> $package Информация о пакете импортируемых файлов.
+     * 
+     * @return void
+     */
+    public function setPackage(array $package): void
+    {
+        $this->package = $package;
+    }
+
+    /**
+     * Выполняет загрузку содержимого файла на основе значения атрибута.
+     * 
+     * Формат значения: @file:<путь_к_файлу>. 
+     * Пример: @file:path/sample.dat
+     * 
+     * @see Import::importAttributes()
+     * 
+     * @return string Возвращает содержимое файла. Если файл недоступен 
+     *    или загрузка не выполнена, возвращается сообщение или значение 
+     *    переменной $value.
+     */
+    protected function importFileAttribute(string $value): string
+    {
+        $value = trim($value);
+        if (mb_strpos($value, '@file:') !== false) {
+            $value    = mb_substr($value, 6);
+            $filename = pathinfo($value, PATHINFO_FILENAME) . '.' . $this->importFileExtension;
+            $dirname  = pathinfo($value, PATHINFO_DIRNAME);
+            $dirname  = $dirname === '.' ? '' : $dirname . DS;
+            
+            $filename = $this->path . DS . $dirname . $filename;
+            if (file_exists($filename)) {
+                $content = file_get_contents($filename, true);
+                if ($content === false) {
+                    return sprintf('Unable to import file "%s".', $filename);
+                }
+                return $content;
+            } else
+                return sprintf('File "%s" does not exist.', $filename);
+        }
+        return $value;
     }
 
     /**
@@ -479,8 +574,8 @@ class Import extends BaseObject
      */
     protected function importAttributes(array $mask, array $row): array
     {
+        /** @var array $columns */
         $columns = [];
-        /** @var array $attr */
         foreach ($mask as $alias => $params) {
             if (isset($row[$alias])) {
                 // если имя поля
@@ -492,6 +587,10 @@ class Import extends BaseObject
                         $columns[$params['field']] = $params['callback']($row);
                     else {
                         $value = $row[$alias];
+                        // проверяет, можно ли импортировать данные из файла для указанного поля
+                        if (isset($params['importFile']) && ($params['importFile'] === true)) {
+                            $value = $this->importFileAttribute($value);
+                        }
                         if (isset($params['type'])) {
                             settype($value, $params['type']);
                         }
@@ -580,10 +679,12 @@ class Import extends BaseObject
     }
 
     /**
-     * Возвращает модель данных (активную запись) для импорта данных.
+     * Добавляет компонент в список компонентов, для которых были импортированы 
+     * демонстрационные данные.
      * 
-     * @param array $component
-     * @param bool $success
+     * @param array<string, mixed> $component Информация о компоненте.
+     * @param bool $success Значение `true` устанавливается при успешном импорте 
+     *    демонстрационных данных компонента.
      * 
      * @return void
      */
@@ -593,6 +694,13 @@ class Import extends BaseObject
         $this->processedComponents[$component['id']] = $component;
     }
 
+    /**
+     * Возвращает список компонент для которых не импортированы демонстрационные данные.
+     * 
+     * @see Import::$processedComponents
+     * 
+     * @return array
+     */
     public function getUnprocessedComponents(): array
     {
         $components = [];

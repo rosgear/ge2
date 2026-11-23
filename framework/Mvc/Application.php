@@ -3,7 +3,7 @@
  * Этот файл является частью пакета Ge Framework.
  * 
  * @link https://rosgear.ru/framework/
- * @copyright Copyright (c) 2015-2025 RosGear
+ * @copyright Copyright (c) 2015-2026 RosGear
  * @license https://rosgear.ru/license/
  */
 
@@ -786,10 +786,13 @@ class Application extends BaseObject
     /**
      * Инициализация и загрузка приложения.
      *
-     * @return $this
+     * @return $this|null
+     * 
+     * @throws Exception\BootstrapException
      */
-    public static function init(): static
+    public static function init(): ?static
     {
+        $application = null;
         try {
             $serviceManager = new ServiceManager;
             /** @var \Ge\Mvc\Application $application */
@@ -815,10 +818,13 @@ class Application extends BaseObject
      * 
      * @param array<string, mixed> $params Параметры конфигурации приложения {@see Application::$config}.
      *
-     * @return $this
+     * @return $this|null
+     * 
+     * @throws Exception\BootstrapException
      */
-    public static function initWith(array $params = []): static
+    public static function initWith(array $params = []): ?static
     {
+        $application = null;
         try {
             $serviceManager = new ServiceManager;
             /** @var \Ge\Mvc\Application $application */
@@ -1097,7 +1103,7 @@ class Application extends BaseObject
                 $this->language->default = $this->config->language;
         }
         // определение языка по запросу
-        $this->language->set($this->language->define());
+        $this->language->set($this->language->define(true));
         // добавление категории с автозагрузкой шаблонов локализации из 
         // настроек службы языка: language/autoload[...]
         $this->translator
